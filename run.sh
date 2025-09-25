@@ -22,7 +22,4 @@ printf "\n\n[SHELL] Compilation success\n\n"
 ./output/out_fast
 
 
-
-python3 ./src/plot2D.py
-
 printf "\n\n[SHELL] Program exit code $?\n\n"
