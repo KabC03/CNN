@@ -30,7 +30,7 @@ namespace matrix {
         Matrix(size_t rows, size_t cols) {
             this->rows = rows;
             this->cols = cols;
-            this->elements.reserve(this->rows * this->cols);
+            this->elements.resize(this->rows * this->cols);
         }
         Matrix(size_t rows, size_t cols, vector<T> elements) {
             this->rows = rows;
@@ -45,35 +45,35 @@ namespace matrix {
         }
 
 
-        Matrix operator+(Matrix rhs) {
+        Matrix operator+(Matrix &rhs) {
             Matrix result(this->rows, this->cols);
             for(size_t i = 0; i < this->rows * this->cols; i++) {
                 result.elements[i] = this->elements[i] + rhs.elements[i];
             }
             return result;
         }
-        Matrix operator-(Matrix rhs) {
+        Matrix operator-(Matrix &rhs) {
             Matrix result(this->rows, this->cols);
             for(size_t i = 0; i < this->rows * this->cols; i++) {
                 result.elements[i] = this->elements[i] - rhs.elements[i];
             }
             return result;
         }
-        Matrix operator*(Matrix rhs) {
+        Matrix operator*(Matrix &rhs) {
             Matrix result(this->rows, this->cols);
             for(size_t i = 0; i < this.rows; i++) {
                 for(size_t j = 0; j < rhs.cols; j++) {
 
                     T sum = 0;
                     for(size_t k = 0; k < this.cols; k++) {
-                        sum += this.at(j, k) + rhs.at(k, j);
+                        sum += this.at(j, k) * rhs.at(k, j);
                     }
                     this.at(i, k) = sum;
                 }
             }
             return result;
         }
-        Matrix operator%(Matrix rhs) { //Hadamard product
+        Matrix operator%(Matrix &rhs) { //Hadamard product
             Matrix result(this->rows, this->cols);
             for(size_t i = 0; i < this->rows * this->cols; i++) {
                 result.elements[i] = this->elements[i] * rhs.elements[i];
@@ -96,11 +96,11 @@ namespace matrix {
             return;
         }
 
-        void convolve(Matrix kernel) {
+        void convolve(Matrix &kernel) {
             for(size_t i = 0; i < this->rows * this->cols; i++) {
                 T sum = 0;
                 for(size_t j = 0; j < kernel.rows * kernel.cols; j++) {
-                    sum =+ this.at((i + j) / this->rows, i + j) * kernel.at(j / this->rows, j);
+                    sum += this.at((i + j) / this->rows, i + j) * kernel.at(j / this->rows, j);
                 }
                 this.at(i / this->rows, i) = sum;
             }
@@ -111,7 +111,7 @@ namespace matrix {
             for(size_t i = 0; i < this->rows * this->cols; i++) {
                 T sum = 0;
                 for(size_t j = 0; j < rows * cols; j++) {
-                    sum =+ this.at((i + j) / this->rows, i + j);
+                    sum += this.at((i + j) / this->rows, i + j);
                 }
                 this.at(i / this->rows, i) = sum / (rows * cols);
             }
@@ -138,10 +138,6 @@ namespace matrix {
                 }
             }
             return;
-        }
-
-        Matrix copy(void) {
-            return Matrix(this.rows, this->cols, this->elements);
         }
 
         T max(void) {
