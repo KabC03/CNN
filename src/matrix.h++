@@ -26,7 +26,8 @@ namespace matrix {
 
         public:
 
-
+        Matrix(void) {
+        } 
         Matrix(size_t rows, size_t cols) {
             this->rows = rows;
             this->cols = cols;
