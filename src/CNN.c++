@@ -4,49 +4,72 @@
 using namespace std;
 using namespace matrix;
 class Layer {
+    protected:
+    float (*ActivationFunction)(float);
 
+    Matrix<float> layerInput;
+    Matrix<float> preActivationOutput;
+
+    public:
+    virtual void evaluate_layer(Matrix<float> &nextLayerInput) = 0;
+    virtual ~Layer() = default;
 };
 
-class ConvolutionLayer : Layer {
+class ConvolutionLayer : public Layer {
     private:
     Matrix<float> kernel;
-    vector<float> layerInput;
+    float bias = 0;
 
     public:
-    ConvolutionLayer(Matrix<float> &initialKernel) {
-        this->kernel = initialKernel;
+    ConvolutionLayer(size_t kernelRows, size_t kernelCols, float (*ActivationFunction)(float)) {
+        this->kernel = Matrix<float>(kernelRows, kernelCols);
+        this->kernel.kaming_uniform_initialisation(kernelRows * kernelCols);
+        
+        this->ActivationFunction = ActivationFunction;
+        return;
     }
+    
+    void evaluate_layer(Matrix<float> &nextLayerInput) override {
+        //Z = W * X + B
+        //O = act(Z);
+        this->preActivationOutput = this->layerInput.convolve(this->kernel);
+        this->preActivationOutput.bias(this->bias);
 
-
+        nextLayerInput.set(preActivationOutput.activate(ActivationFunction));
+        return;
+    }
 };
 
-class FullyConnectedLayer : Layer {
+class FullyConnectedLayer : public Layer {
     private:
-    vector<float> weights;
-    vector<float> biases;
-    float (*activation_function)(float);
-
-    //For backpropagation
-    vector<float> layerInput; 
-    vector<float> preactivationOutput;
+    Matrix<float> weights;
+    Matrix<float> biases;
 
     public:
-    FullyConnectedLayer(float (*activation_function)(float), vector<float> &initialWeights, vector<float> &initialBiases) {
-        this->activation_function = activation_function;
-        this->weights = initialWeights;
-        this->weights = initialBiases;
+    FullyConnectedLayer(size_t previousNumLayers, size_t currentNumLayers, float (*ActivationFunction)(float)) {
+        this->weights = Matrix<float>(currentNumLayers, previousNumLayers);
+        this->weights.kaming_uniform_initialisation(currentNumLayers);
+        this->biases = Matrix<float>(currentNumLayers, 1);
+        this->biases.kaming_uniform_initialisation(currentNumLayers);
+
+        this->ActivationFunction = ActivationFunction;
+        return;
     }
 
+    void evaluate_layer(Matrix<float> &nextLayerInput) override {
+        //Z = W * X + B
+        //O = act(Z);
+        this->preActivationOutput = this->weights * this->layerInput;
+        this->preActivationOutput = this->preActivationOutput + this->biases;
 
-    Matrix<float> evaluate_layer(Matrix<float> &input) {
-        
+        nextLayerInput.set(preActivationOutput.activate(ActivationFunction));
         return;
     }
 };
 
 class CNN {
     private:
-    vector<Layer> layers;
+    vector<Layer*> layers;
 
     public:
 

@@ -7,6 +7,8 @@
 #include <cstdint>
 #include <random>
 #include <thread>
+#include <random>
+#include <cmath>
 
 
 
@@ -40,6 +42,12 @@ namespace matrix {
         }
 
 
+        size_t get_rows(void) {
+            return this->rows;
+        }
+        size_t get_cols(void) {
+            return this->cols;
+        }
 
         T& at(size_t row, size_t col) {
             return elements[row * this->cols + col];
@@ -82,6 +90,10 @@ namespace matrix {
             return result;
         }
 
+        void set(Matrix<float> input) {
+            this->elements = input;
+            return;
+        }
 
         void bias(T bias) {
             for(T& element : this->elements){
@@ -97,7 +109,28 @@ namespace matrix {
             return;
         }
 
-        void convolve(Matrix &kernel) {
+        Matrix<T> activate(T (*activationFunction)(T)) {
+            Matrix<T> result(this->rows, this->cols);
+            for(T &element : result->elements) {
+                element = activationFunction(element);
+            }
+            return result;
+        }
+
+        void activate_in_place(T (*activationFunction)(T)) {
+            for(T &element : this->elements) {
+                element = activationFunction(element);
+            }
+            return;
+        }
+
+        Matrix<T> convolve(Matrix &kernel) {
+            Matrix result(0,0);
+
+            return result;
+        }
+
+        void convolve_in_place(Matrix &kernel) {
             for(size_t i = 0; i < this->rows * this->cols; i++) {
                 T sum = 0;
                 for(size_t j = 0; j < kernel.rows * kernel.cols; j++) {
@@ -140,6 +173,21 @@ namespace matrix {
             }
             return;
         }
+
+        void kaming_uniform_initialisation(double fanIn) {
+            double limit = sqrt((double)6 / fanIn);
+
+            random_device rd;
+            mt19937 gen(rd());
+            uniform_real_distribution<T> dist(-limit, limit);
+
+            for(T &element : this->elements) {
+                element = dist(gen);
+            }
+
+            return;
+        }
+
 
         T max(void) {
             T currentMax = this->elements[0];
